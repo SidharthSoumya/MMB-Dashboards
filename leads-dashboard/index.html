@@ -8,49 +8,64 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Design System - Dark Theme with Glassmorphism */
+      /* Design System - Modern Dark Theme with Glassmorphism */
       --bg-primary: #0a0a0f;
       --bg-secondary: #12121a;
       --bg-card: rgba(255, 255, 255, 0.03);
       --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-elevated: rgba(255, 255, 255, 0.08);
 
       --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
       --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      --gradient-gold: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
 
       --text-primary: #ffffff;
       --text-secondary: #a0a0b0;
       --text-muted: #6b6b7b;
 
       --border-glass: rgba(255, 255, 255, 0.08);
+      --border-glass-hover: rgba(255, 255, 255, 0.15);
       --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.15);
       --backdrop-blur: blur(20px);
 
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
       --radius-xl: 24px;
+      --radius-2xl: 32px;
 
       --spacing-xs: 4px;
       --spacing-sm: 8px;
       --spacing-md: 16px;
       --spacing-lg: 24px;
       --spacing-xl: 32px;
+      --spacing-2xl: 48px;
 
       --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
       --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
       --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      --safe-area-top: env(safe-area-inset-top, 0px);
+      --safe-area-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
@@ -62,6 +77,8 @@
       min-height: 100vh;
       color: var(--text-primary);
       line-height: 1.5;
+      padding-top: var(--safe-area-top);
+      padding-bottom: var(--safe-area-bottom);
     }
 
     .container {
@@ -93,6 +110,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.5px;
     }
 
     .header-actions {
@@ -105,11 +123,46 @@
       font-size: 13px;
       color: var(--text-muted);
       font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
     }
 
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(56, 239, 125, 0.1);
+      border: 1px solid rgba(56, 239, 125, 0.2);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      color: #38ef7d;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .status-indicator.syncing {
+      background: rgba(240, 147, 251, 0.1);
+      border-color: rgba(240, 147, 251, 0.2);
+      color: #f093fb;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: var(--spacing-sm);
       padding: 10px 18px;
       border-radius: var(--radius-md);
@@ -119,6 +172,7 @@
       cursor: pointer;
       transition: all var(--transition-base);
       font-family: 'Inter', sans-serif;
+      text-decoration: none;
     }
 
     .btn-primary {
@@ -132,6 +186,10 @@
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
     }
 
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
     .btn-glass {
       background: var(--bg-card);
       color: var(--text-primary);
@@ -141,7 +199,26 @@
 
     .btn-glass:hover {
       background: var(--bg-card-hover);
-      border-color: rgba(255, 255, 255, 0.15);
+      border-color: var(--border-glass-hover);
+    }
+
+    .btn-icon {
+      padding: 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-glass-hover);
+      color: var(--text-primary);
     }
 
     /* Filter Bar */
@@ -164,16 +241,16 @@
     }
 
     .filter-label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
       color: var(--text-muted);
     }
 
     .filter-select,
     .filter-input {
-      padding: 10px 14px;
+      padding: 12px 14px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-md);
@@ -182,17 +259,18 @@
       font-family: 'Inter', sans-serif;
       transition: all var(--transition-fast);
       outline: none;
+      min-height: 44px;
     }
 
     .filter-select:hover,
     .filter-input:hover {
-      border-color: rgba(255, 255, 255, 0.15);
+      border-color: var(--border-glass-hover);
     }
 
     .filter-select:focus,
     .filter-input:focus {
       border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
     }
 
     .filter-select option {
@@ -200,10 +278,14 @@
       color: var(--text-primary);
     }
 
+    .filter-input::placeholder {
+      color: var(--text-muted);
+    }
+
     /* KPI Grid */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: var(--spacing-lg);
       margin-bottom: var(--spacing-xl);
     }
@@ -245,6 +327,8 @@
     .kpi-card.success { --gradient: var(--gradient-success); }
     .kpi-card.warning { --gradient: var(--gradient-warning); }
     .kpi-card.info { --gradient: var(--gradient-info); }
+    .kpi-card.danger { --gradient: var(--gradient-danger); }
+    .kpi-card.gold { --gradient: var(--gradient-gold); }
 
     .kpi-header {
       display: flex;
@@ -254,35 +338,60 @@
     }
 
     .kpi-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
       color: var(--text-muted);
     }
 
     .kpi-icon {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 20px;
       background: var(--gradient);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .kpi-value {
-      font-size: 32px;
-      font-weight: 700;
+      font-size: 36px;
+      font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
       color: var(--text-primary);
+      letter-spacing: -1px;
+      line-height: 1;
     }
 
     .kpi-subtitle {
       font-size: 13px;
       color: var(--text-secondary);
       margin-top: var(--spacing-xs);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .kpi-trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: var(--spacing-sm);
+    }
+
+    .kpi-trend.up {
+      background: rgba(56, 239, 125, 0.1);
+      color: #38ef7d;
+    }
+
+    .kpi-trend.down {
+      background: rgba(235, 51, 73, 0.1);
+      color: #eb3349;
     }
 
     /* Charts Grid */
@@ -315,9 +424,12 @@
     }
 
     .chart-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
     }
 
     .chart-container {
@@ -353,7 +465,7 @@
 
     .funnel-bar {
       flex: 1;
-      height: 32px;
+      height: 40px;
       border-radius: var(--radius-sm);
       background: var(--gradient);
       display: flex;
@@ -361,6 +473,7 @@
       padding: 0 var(--spacing-md);
       position: relative;
       overflow: hidden;
+      min-width: 100px;
     }
 
     .funnel-bar::before {
@@ -370,7 +483,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
     }
 
     .funnel-label {
@@ -379,23 +492,25 @@
       font-size: 13px;
       font-weight: 600;
       color: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      white-space: nowrap;
     }
 
     .funnel-count {
-      min-width: 50px;
+      min-width: 60px;
       text-align: right;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
       color: var(--text-primary);
     }
 
     .funnel-percent {
-      min-width: 45px;
+      min-width: 55px;
       text-align: right;
       font-size: 12px;
       color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
     }
 
     /* Table */
@@ -416,13 +531,22 @@
     }
 
     .table-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .table-actions {
+      display: flex;
+      gap: var(--spacing-sm);
     }
 
     .table-wrapper {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
@@ -433,13 +557,14 @@
     th {
       padding: var(--spacing-md) var(--spacing-lg);
       text-align: left;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-glass);
       background: rgba(255, 255, 255, 0.02);
+      white-space: nowrap;
     }
 
     td {
@@ -448,6 +573,7 @@
       color: var(--text-secondary);
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       transition: background var(--transition-fast);
+      vertical-align: middle;
     }
 
     tr:hover td {
@@ -457,12 +583,21 @@
     .badge {
       display: inline-flex;
       align-items: center;
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.5px;
+      gap: 6px;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
     }
 
     .badge-high {
@@ -495,13 +630,35 @@
       border: 1px solid rgba(240, 147, 251, 0.3);
     }
 
-    /* Loading */
+    .badge-not-set {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .badge-not-set::before {
+      display: none;
+    }
+
+    .contact-link {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      transition: color var(--transition-fast);
+    }
+
+    .contact-link:hover {
+      color: #667eea;
+    }
+
+    /* Loading State */
     .loading {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 500px;
+      min-height: 500px;
       gap: var(--spacing-lg);
     }
 
@@ -523,7 +680,13 @@
       font-size: 14px;
     }
 
-    /* Error */
+    .loading-subtext {
+      color: var(--text-muted);
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* Error State */
     .error {
       background: rgba(235, 51, 73, 0.1);
       border: 1px solid rgba(235, 51, 73, 0.3);
@@ -531,6 +694,41 @@
       padding: var(--spacing-xl);
       text-align: center;
       color: #eb3349;
+    }
+
+    .error h3 {
+      font-size: 18px;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .error p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .error code {
+      display: block;
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius-md);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-2xl);
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: var(--spacing-md);
+      opacity: 0.5;
     }
 
     /* Responsive */
@@ -551,6 +749,10 @@
         text-align: center;
       }
 
+      .header-title {
+        justify-content: center;
+      }
+
       .filter-bar {
         grid-template-columns: 1fr;
       }
@@ -560,7 +762,27 @@
       }
 
       .kpi-value {
-        font-size: 24px;
+        font-size: 28px;
+      }
+
+      .table-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+      }
+
+      .table-actions {
+        width: 100%;
+      }
+
+      .table-actions .btn {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -572,6 +794,7 @@
 
     ::-webkit-scrollbar-track {
       background: var(--bg-secondary);
+      border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb {
@@ -582,6 +805,19 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.2);
     }
+
+    /* Auto-refresh indicator */
+    .auto-refresh {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .auto-refresh-icon {
+      animation: spin 3s linear infinite;
+    }
   </style>
 </head>
 <body>
@@ -591,9 +827,13 @@
         <h1>🎯 Med Buddy Leads Dashboard</h1>
       </div>
       <div class="header-actions">
+        <span class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span id="statusText">Connected</span>
+        </span>
         <span class="last-updated" id="lastUpdated">Last updated: --</span>
-        <button class="btn btn-primary" onclick="loadData()">
-          <span>↻</span> Refresh
+        <button class="btn btn-primary" onclick="loadData()" id="refreshBtn">
+          <span class="auto-refresh-icon">↻</span> Refresh
         </button>
       </div>
     </header>
@@ -601,36 +841,37 @@
     <!-- Filter Bar -->
     <div class="filter-bar">
       <div class="filter-group">
-        <label class="filter-label">Search</label>
-        <input type="text" class="filter-input" id="searchFilter" placeholder="Name or Contact..." oninput="applyFilters()">
+        <label class="filter-label">🔍 Search</label>
+        <input type="text" class="filter-input" id="searchFilter" placeholder="Name, Contact, or Lead ID..." oninput="applyFilters()">
       </div>
       <div class="filter-group">
-        <label class="filter-label">Lead Source</label>
+        <label class="filter-label">📊 Lead Source</label>
         <select class="filter-select" id="sourceFilter" onchange="applyFilters()">
           <option value="">All Sources</option>
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Lead Stage</label>
+        <label class="filter-label">🔄 Lead Stage</label>
         <select class="filter-select" id="stageFilter" onchange="applyFilters()">
           <option value="">All Stages</option>
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Interest Level</label>
+        <label class="filter-label">🔥 Interest Level</label>
         <select class="filter-select" id="interestFilter" onchange="applyFilters()">
           <option value="">All Levels</option>
           <option value="HIGH">High</option>
           <option value="MEDIUM">Medium</option>
           <option value="LOW">Low</option>
+          <option value="NOT SET">Not Set</option>
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Date From</label>
+        <label class="filter-label">📅 Date From</label>
         <input type="date" class="filter-input" id="dateFrom" onchange="applyFilters()">
       </div>
       <div class="filter-group">
-        <label class="filter-label">Date To</label>
+        <label class="filter-label">📅 Date To</label>
         <input type="date" class="filter-input" id="dateTo" onchange="applyFilters()">
       </div>
     </div>
@@ -639,21 +880,26 @@
       <div class="loading">
         <div class="spinner"></div>
         <span class="loading-text">Loading leads data...</span>
+        <span class="loading-subtext">Fetching from Google Sheets</span>
       </div>
     </div>
   </div>
 
   <script>
-    // API endpoint - uses local proxy when testing, direct URL when deployed
-    const API_URL = '/api/csv';
+    // Configuration
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQza5B6DrWd1smNddShoPKYT42_lRWCYqqvvoffdZNgx_Wp28KySj2HiMsefasoTdjCuUuqNTTgEZMH/pub?output=csv';
+    const PROXY_URL = 'https://proxy.cors.sh/' + CSV_URL;
+    const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
+    // State
     let allData = [];
     let filteredData = [];
     let charts = {};
+    let isLoading = false;
 
-    // Parse date from various formats
+    // Utility Functions
     function parseDate(dateStr) {
-      if (!dateStr || dateStr === '-') return null;
+      if (!dateStr || dateStr === '-' || dateStr === '') return null;
 
       // Handle "23 Jun 2026" format
       const months = {
@@ -675,37 +921,50 @@
       return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
+    function formatDateForInput(date) {
+      if (!date) return '';
+      return date.toISOString().split('T')[0];
+    }
+
     function parseFollowUp(dateStr) {
       if (!dateStr || dateStr === '-') return null;
       return parseDate(dateStr);
     }
 
     function processData(data) {
-      return data.map(row => ({
-        leadId: row['LEAD ID'] || '',
-        dateReceived: parseDate(row['DATE RECEIVED']),
-        dateReceivedStr: row['DATE RECEIVED'] || '',
-        contact: row['CONTACT'] || '',
-        name: row['NAME (If Known)'] || '',
-        age: parseInt(row['AGE']) || null,
-        leadSource: row['LEAD SOURCE'] || 'Unknown',
-        leadStage: row['LEAD STAGE'] || 'Unknown',
-        timeOfCall: row['TIME OF CALL'] || '',
-        interest: row['INTEREST'] || 'NOT SET',
-        initialNotes: row['INITIAL INQUIRY/NOTES'] || '',
-        lastContacted: parseDate(row['LAST CONTACTED']),
-        nextFollowUp: parseFollowUp(row['Next Follow-up']),
-        conversationSummary: row['LAST CONVERSATION SUMMARY'] || ''
-      })).filter(row => row.leadId !== '');
+      return data
+        .filter(row => row['LEAD ID'] && row['LEAD ID'].trim() !== '')
+        .map(row => ({
+          leadId: (row['LEAD ID'] || '').trim(),
+          dateReceived: parseDate(row['DATE RECEIVED']),
+          dateReceivedStr: (row['DATE RECEIVED'] || '').trim(),
+          contact: (row['CONTACT'] || '').trim(),
+          name: (row['NAME (If Known)'] || '').trim(),
+          age: parseInt(row['AGE']) || null,
+          leadSource: (row['LEAD SOURCE'] || 'Unknown').trim(),
+          leadStage: (row['LEAD STAGE'] || 'Unknown').trim(),
+          timeOfCall: (row['TIME OF CALL'] || '').trim(),
+          interest: (row['INTEREST'] || 'NOT SET').trim().toUpperCase(),
+          initialNotes: (row['INITIAL INQUIRY/NOTES'] || '').trim(),
+          lastContacted: parseDate(row['LAST CONTACTED']),
+          lastContactedStr: (row['LAST CONTACTED'] || '').trim(),
+          nextFollowUp: parseFollowUp(row['Next Follow-up']),
+          nextFollowUpStr: (row['Next Follow-up'] || '').trim(),
+          conversationSummary: (row['LAST CONVERSATION SUMMARY'] || '').trim()
+        }));
     }
 
     function getUniqueValues(data, field) {
-      return [...new Set(data.map(d => d[field]).filter(Boolean))].sort();
+      return [...new Set(data.map(d => d[field]).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     }
 
     function populateFilters(data) {
       const sourceSelect = document.getElementById('sourceFilter');
       const stageSelect = document.getElementById('stageFilter');
+
+      // Clear existing options (except "All")
+      sourceSelect.innerHTML = '<option value="">All Sources</option>';
+      stageSelect.innerHTML = '<option value="">All Stages</option>';
 
       const sources = getUniqueValues(data, 'leadSource');
       const stages = getUniqueValues(data, 'leadStage');
@@ -785,113 +1044,176 @@
         'NOT SET': data.filter(d => d.interest === 'NOT SET' || !d.interest).length
       };
 
-      // Follow-ups due
+      // Called vs Attempted
+      const called = data.filter(d => d.leadStage === 'Called').length;
+      const attempted = data.filter(d => d.leadStage === 'Attempted Call').length;
+      const conversionRate = total > 0 ? ((called / total) * 100).toFixed(1) : 0;
+
+      // Follow-ups due (today or before)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const followUpsDue = data.filter(d =>
         d.nextFollowUp && d.nextFollowUp <= today
       ).length;
 
+      // Follow-ups upcoming (next 7 days)
       const followUpsUpcoming = data.filter(d => {
         if (!d.nextFollowUp) return false;
-        const upcoming = new Date(today);
-        upcoming.setDate(upcoming.getDate() + 7);
-        return d.nextFollowUp > today && d.nextFollowUp <= upcoming;
+        const weekFromNow = new Date(today);
+        weekFromNow.setDate(weekFromNow.getDate() + 7);
+        return d.nextFollowUp > today && d.nextFollowUp <= weekFromNow;
       }).length;
 
-      // This week and this month
+      // This week (last 7 days)
       const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
       const thisWeek = data.filter(d => {
         if (!d.dateReceived) return false;
-        const weekAgo = new Date(now);
-        weekAgo.setDate(weekAgo.getDate() - 7);
         return d.dateReceived >= weekAgo;
       }).length;
 
+      // This month
       const thisMonth = data.filter(d => {
         if (!d.dateReceived) return false;
         return d.dateReceived.getMonth() === now.getMonth() &&
                d.dateReceived.getFullYear() === now.getFullYear();
       }).length;
 
-      // Daily trend
+      // Daily trend (last 14 days)
       const dailyTrend = {};
-      data.filter(d => d.dateReceived).forEach(d => {
+      const fourteenDaysAgo = new Date(now);
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+      data.filter(d => d.dateReceived && d.dateReceived >= fourteenDaysAgo).forEach(d => {
         const key = d.dateReceived.toISOString().split('T')[0];
         dailyTrend[key] = (dailyTrend[key] || 0) + 1;
       });
+
+      // Fill in missing dates with 0
+      for (let i = 0; i < 14; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const key = date.toISOString().split('T')[0];
+        if (!dailyTrend[key]) dailyTrend[key] = 0;
+      }
+
+      // Hot leads needing attention (HIGH interest, not called)
+      const hotLeadsNeedingAttention = data.filter(d =>
+        d.interest === 'HIGH' && d.leadStage !== 'Called'
+      ).length;
 
       return {
         total,
         byStage,
         bySource,
         byInterest,
+        called,
+        attempted,
+        conversionRate,
         followUpsDue,
         followUpsUpcoming,
         thisWeek,
         thisMonth,
-        dailyTrend
+        dailyTrend,
+        hotLeadsNeedingAttention
       };
     }
 
     function createChart(ctx, type, data, options = {}) {
+      // Global Chart.js defaults
       Chart.defaults.color = '#a0a0b0';
       Chart.defaults.font.family = 'Inter';
+      Chart.defaults.font.size = 11;
+
+      const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 750,
+          easing: 'easeOutQuart'
+        },
+        plugins: {
+          legend: {
+            display: options.hideLegend ? false : true,
+            position: options.legendPosition || 'bottom',
+            labels: {
+              color: '#6b6b7b',
+              padding: 15,
+              font: { size: 11 },
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(10, 10, 15, 0.95)',
+            titleColor: '#ffffff',
+            bodyColor: '#a0a0b0',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: true,
+            cornerRadius: 8,
+            titleFont: { size: 13, weight: '600' },
+            bodyFont: { size: 12 },
+            titleSpacing: 8,
+            bodySpacing: 6
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.03)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#6b6b7b',
+              font: { size: 10 },
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+          y: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.03)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#6b6b7b',
+              font: { size: 10 }
+            },
+            beginAtZero: true
+          }
+        }
+      };
+
+      // Merge options
+      const mergedOptions = {
+        ...defaultOptions,
+        ...options,
+        plugins: {
+          ...defaultOptions.plugins,
+          ...options.plugins
+        },
+        scales: options.hideScales ? false : {
+          ...defaultOptions.scales,
+          ...options.scales
+        }
+      };
 
       return new Chart(ctx, {
         type,
         data,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: options.hideLegend ? false : true,
-              labels: {
-                color: '#6b6b7b',
-                padding: 15,
-                font: { size: 12 }
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(10, 10, 15, 0.95)',
-              titleColor: '#ffffff',
-              bodyColor: '#a0a0b0',
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-              borderWidth: 1,
-              padding: 12,
-              displayColors: true,
-              cornerRadius: 8,
-              titleFont: { size: 14, weight: '600' },
-              bodyFont: { size: 13 }
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                color: 'rgba(255, 255, 255, 0.03)',
-                drawBorder: false
-              },
-              ticks: {
-                color: '#6b6b7b',
-                font: { size: 11 }
-              }
-            },
-            y: {
-              grid: {
-                color: 'rgba(255, 255, 255, 0.03)',
-                drawBorder: false
-              },
-              ticks: {
-                color: '#6b6b7b',
-                font: { size: 11 }
-              },
-              beginAtZero: true
-            }
-          },
-          ...options
+        options: mergedOptions
+      });
+    }
+
+    function destroyCharts() {
+      Object.values(charts).forEach(chart => {
+        if (chart && chart.destroy) {
+          chart.destroy();
         }
       });
+      charts = {};
     }
 
     function renderDashboard(data) {
@@ -909,28 +1231,31 @@
               <div class="kpi-icon" style="--gradient: var(--gradient-primary)">📊</div>
             </div>
             <div class="kpi-value">${metrics.total.toLocaleString()}</div>
+            ${metrics.thisWeek > 0 ? `<div class="kpi-trend up">↑ ${metrics.thisWeek} new</div>` : ''}
           </div>
 
           <div class="kpi-card success">
             <div class="kpi-header">
               <div>
                 <div class="kpi-title">Called</div>
-                <div class="kpi-subtitle">${metrics.byStage['Called'] || 0} contacted</div>
+                <div class="kpi-subtitle">${metrics.conversionRate}% conversion</div>
               </div>
               <div class="kpi-icon" style="--gradient: var(--gradient-success)">✓</div>
             </div>
-            <div class="kpi-value">${(metrics.byStage['Called'] || 0).toLocaleString()}</div>
+            <div class="kpi-value">${metrics.called.toLocaleString()}</div>
+            <div class="kpi-trend ${metrics.attempted > 0 ? 'up' : ''}">${metrics.attempted} pending</div>
           </div>
 
           <div class="kpi-card warning">
             <div class="kpi-header">
               <div>
-                <div class="kpi-title">High Interest</div>
-                <div class="kpi-subtitle">${metrics.byInterest.HIGH} hot leads</div>
+                <div class="kpi-title">Hot Leads</div>
+                <div class="kpi-subtitle">${metrics.hotLeadsNeedingAttention} need attention</div>
               </div>
               <div class="kpi-icon" style="--gradient: var(--gradient-warning)">🔥</div>
             </div>
             <div class="kpi-value">${metrics.byInterest.HIGH.toLocaleString()}</div>
+            ${metrics.hotLeadsNeedingAttention > 0 ? `<div class="kpi-trend down">⚠ ${metrics.hotLeadsNeedingAttention} urgent</div>` : ''}
           </div>
 
           <div class="kpi-card info">
@@ -942,6 +1267,7 @@
               <div class="kpi-icon" style="--gradient: var(--gradient-info)">⏰</div>
             </div>
             <div class="kpi-value">${metrics.followUpsDue.toLocaleString()}</div>
+            ${metrics.followUpsUpcoming > 0 ? `<div class="kpi-trend down">${metrics.followUpsUpcoming} this week</div>` : ''}
           </div>
         </div>
 
@@ -958,7 +1284,7 @@
 
           <div class="chart-card">
             <div class="chart-header">
-              <div class="chart-title">🎯 Interest Distribution</div>
+              <div class="chart-title">🔥 Interest Distribution</div>
             </div>
             <div class="chart-container">
               <canvas id="interestChart"></canvas>
@@ -999,14 +1325,18 @@
         <div class="table-card" style="margin-top: ${var(--spacing-xl)}">
           <div class="table-header">
             <div class="table-title">📋 Recent Leads</div>
-            <button class="btn btn-glass" onclick="exportTable()">Export CSV</button>
+            <div class="table-actions">
+              <button class="btn btn-glass" onclick="exportTable()">
+                ⬇ Export CSV
+              </button>
+            </div>
           </div>
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Lead ID</th>
-                  <th>Date</th>
+                  <th>Date Received</th>
                   <th>Name</th>
                   <th>Contact</th>
                   <th>Source</th>
@@ -1018,10 +1348,10 @@
               <tbody>
                 ${data.slice(-20).reverse().map(d => `
                   <tr>
-                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">${d.leadId}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-primary);">${d.leadId}</td>
                     <td>${d.dateReceivedStr || '-'}</td>
-                    <td>${d.name || '-'}</td>
-                    <td style="font-family: 'JetBrains Mono', monospace;">${d.contact || '-'}</td>
+                    <td>${d.name || '<span style="color: var(--text-muted);">Unknown</span>'}</td>
+                    <td><a href="tel:${d.contact}" class="contact-link">${d.contact || '-'}</a></td>
                     <td>${d.leadSource}</td>
                     <td>
                       <span class="badge ${d.leadStage === 'Called' ? 'badge-called' : 'badge-attempted'}">
@@ -1029,11 +1359,11 @@
                       </span>
                     </td>
                     <td>
-                      <span class="badge badge-${d.interest.toLowerCase()}">
+                      <span class="badge badge-${d.interest === 'NOT SET' ? 'not-set' : d.interest.toLowerCase()}">
                         ${d.interest}
                       </span>
                     </td>
-                    <td>${formatDate(d.nextFollowUp)}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">${formatDate(d.nextFollowUp)}</td>
                   </tr>
                 `).join('')}
               </tbody>
@@ -1042,11 +1372,17 @@
         </div>
       `;
 
-      // Create charts
+      // Destroy existing charts
+      destroyCharts();
+
+      // Create trend chart
       const trendCtx = document.getElementById('trendChart').getContext('2d');
-      const sortedDates = Object.keys(metrics.dailyTrend).sort().slice(-14);
+      const sortedDates = Object.keys(metrics.dailyTrend).sort();
       charts.trend = createChart(trendCtx, 'line', {
-        labels: sortedDates.map(d => d.slice(5)), // MM-DD format
+        labels: sortedDates.map(d => {
+          const date = new Date(d);
+          return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        }),
         datasets: [{
           label: 'Leads',
           data: sortedDates.map(d => metrics.dailyTrend[d]),
@@ -1058,49 +1394,92 @@
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointRadius: 4,
-          pointHoverRadius: 6
+          pointHoverRadius: 6,
+          borderWidth: 3
         }]
       }, {
-        plugins: { legend: { display: false } }
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `Leads: ${ctx.raw}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            ticks: { color: '#6b6b7b', font: { size: 10 }, maxRotation: 45 }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            ticks: { color: '#6b6b7b', font: { size: 10 }, stepSize: 1 }
+          }
+        }
       });
 
+      // Create interest chart
       const interestCtx = document.getElementById('interestChart').getContext('2d');
       charts.interest = createChart(interestCtx, 'doughnut', {
         labels: ['High', 'Medium', 'Low', 'Not Set'],
         datasets: [{
           data: [metrics.byInterest.HIGH, metrics.byInterest.MEDIUM, metrics.byInterest.LOW, metrics.byInterest['NOT SET']],
           backgroundColor: [
-            'rgba(235, 51, 73, 0.8)',
-            'rgba(245, 87, 108, 0.8)',
-            'rgba(102, 126, 234, 0.8)',
-            'rgba(255, 255, 255, 0.2)'
+            'rgba(235, 51, 73, 0.9)',
+            'rgba(245, 87, 108, 0.9)',
+            'rgba(102, 126, 234, 0.9)',
+            'rgba(107, 107, 123, 0.5)'
           ],
           borderColor: 'rgba(255, 255, 255, 0.1)',
-          borderWidth: 1
+          borderWidth: 2,
+          hoverOffset: 10
         }]
       }, {
         cutout: '65%',
-        plugins: { legend: { position: 'bottom' } }
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { padding: 12, usePointStyle: true }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.label}: ${ctx.raw} (${((ctx.raw / metrics.total) * 100).toFixed(1)}%)`
+            }
+          }
+        }
       });
 
+      // Create source chart
       const sourceCtx = document.getElementById('sourceChart').getContext('2d');
       const topSources = Object.entries(metrics.bySource)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 8);
       charts.source = createChart(sourceCtx, 'bar', {
-        labels: topSources.map(s => s[0].length > 20 ? s[0].substring(0, 20) + '...' : s[0]),
+        labels: topSources.map(s => s[0].length > 18 ? s[0].substring(0, 18) + '...' : s[0]),
         datasets: [{
           label: 'Leads',
           data: topSources.map(s => s[1]),
-          backgroundColor: 'rgba(118, 75, 162, 0.7)',
+          backgroundColor: 'rgba(118, 75, 162, 0.8)',
           borderRadius: 8,
-          border: { color: 'rgba(118, 75, 162, 1)', width: 1 }
+          border: { color: 'rgba(118, 75, 162, 1)', width: 2 },
+          barThickness: 32
         }]
       }, {
         indexAxis: 'y',
-        plugins: { legend: { display: false } }
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            ticks: { color: '#6b6b7b', font: { size: 10 } }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            ticks: { color: '#6b6b7b', font: { size: 10 } }
+          }
+        }
       });
 
+      // Create stage chart
       const stageCtx = document.getElementById('stageChart').getContext('2d');
       charts.stage = createChart(stageCtx, 'bar', {
         labels: Object.keys(metrics.byStage),
@@ -1108,14 +1487,26 @@
           label: 'Leads',
           data: Object.values(metrics.byStage),
           backgroundColor: [
-            'rgba(56, 239, 125, 0.7)',
-            'rgba(240, 147, 251, 0.7)',
-            'rgba(102, 126, 234, 0.7)'
+            'rgba(56, 239, 125, 0.8)',
+            'rgba(240, 147, 251, 0.8)',
+            'rgba(102, 126, 234, 0.8)'
           ],
-          borderRadius: 8
+          borderRadius: 8,
+          border: { width: 2 },
+          barThickness: 48
         }]
       }, {
-        plugins: { legend: { display: false } }
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            ticks: { color: '#6b6b7b', font: { size: 10 } }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            ticks: { color: '#6b6b7b', font: { size: 10 }, stepSize: 1 }
+          }
+        }
       });
 
       // Render funnel
@@ -1126,7 +1517,7 @@
       ];
 
       const funnelContainer = document.getElementById('funnelContainer');
-      funnelContainer.innerHTML = funnelData.map((stage, i) => {
+      funnelContainer.innerHTML = funnelData.map((stage) => {
         const width = totalLeads > 0 ? (stage.count / totalLeads) * 100 : 0;
         const percent = totalLeads > 0 ? ((stage.count / totalLeads) * 100).toFixed(1) : 0;
         return `
@@ -1134,7 +1525,7 @@
             <div class="funnel-bar" style="width: ${Math.max(width, 15)}%; background: ${stage.gradient}">
               <span class="funnel-label">${stage.label}</span>
             </div>
-            <span class="funnel-count">${stage.count}</span>
+            <span class="funnel-count">${stage.count.toLocaleString()}</span>
             <span class="funnel-percent">${percent}%</span>
           </div>
         `;
@@ -1144,19 +1535,50 @@
     function showError(message) {
       document.getElementById('content').innerHTML = `
         <div class="error">
-          <h3 style="margin-bottom: 10px;">⚠️ Error Loading Data</h3>
+          <h3>⚠️ Error Loading Data</h3>
           <p>${message}</p>
+          <code>Check your internet connection and try refreshing.</code>
         </div>
       `;
+      updateStatus('error', 'Connection Failed');
+    }
+
+    function updateStatus(status, text) {
+      const indicator = document.getElementById('statusIndicator');
+      const statusText = document.getElementById('statusText');
+
+      if (status === 'syncing') {
+        indicator.classList.add('syncing');
+        statusText.textContent = text;
+      } else if (status === 'error') {
+        indicator.classList.add('syncing');
+        indicator.style.background = 'rgba(235, 51, 73, 0.1)';
+        indicator.style.borderColor = 'rgba(235, 51, 73, 0.2)';
+        indicator.style.color = '#eb3349';
+        statusText.textContent = text;
+      } else {
+        indicator.classList.remove('syncing');
+        indicator.style.background = 'rgba(56, 239, 125, 0.1)';
+        indicator.style.borderColor = 'rgba(56, 239, 125, 0.2)';
+        indicator.style.color = '#38ef7d';
+        statusText.textContent = text;
+      }
     }
 
     function loadData() {
-      document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleString();
+      if (isLoading) return;
 
-      fetch(API_URL)
+      isLoading = true;
+      updateStatus('syncing', 'Syncing...');
+
+      const refreshBtn = document.getElementById('refreshBtn');
+      refreshBtn.disabled = true;
+      refreshBtn.style.opacity = '0.6';
+
+      fetch(PROXY_URL)
         .then(response => {
           if (!response.ok) {
-            throw new Error('Server returned: ' + response.status);
+            throw new Error('Network response was not ok: ' + response.status);
           }
           return response.text();
         })
@@ -1165,57 +1587,89 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-              console.log('Parsed data:', results.data.length, 'rows');
+              console.log('✅ Parsed data:', results.data.length, 'rows');
               try {
                 allData = processData(results.data);
-                console.log('Processed data:', allData.length, 'valid rows');
+                console.log('✅ Processed data:', allData.length, 'valid leads');
                 filteredData = [...allData];
                 populateFilters(allData);
                 renderDashboard(allData);
+                updateStatus('success', 'Connected');
+
+                const now = new Date();
+                document.getElementById('lastUpdated').textContent =
+                  'Last updated: ' + now.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
               } catch (error) {
-                console.error('Processing error:', error);
+                console.error('❌ Processing error:', error);
                 showError('Error processing data: ' + error.message);
+              } finally {
+                isLoading = false;
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
               }
             }
           });
         })
         .catch(error => {
-          console.error('Fetch error:', error);
-          showError('Failed to load data: ' + error.message + '<br><br>Make sure the local server is running:<br><code>node server.js</code>');
+          console.error('❌ Fetch error:', error);
+          showError('Failed to load data: ' + error.message);
+          isLoading = false;
+          refreshBtn.disabled = false;
+          refreshBtn.style.opacity = '1';
         });
     }
 
     function exportTable() {
-      const headers = ['Lead ID', 'Date', 'Name', 'Contact', 'Source', 'Stage', 'Interest', 'Follow-up'];
-      const rows = filteredData.slice(-100).map(d => [
+      const headers = ['Lead ID', 'Date Received', 'Name', 'Contact', 'Age', 'Source', 'Stage', 'Interest', 'Last Contacted', 'Next Follow-up', 'Notes'];
+      const rows = filteredData.map(d => [
         d.leadId,
         d.dateReceivedStr,
         d.name,
         d.contact,
+        d.age || '',
         d.leadSource,
         d.leadStage,
         d.interest,
-        d.nextFollowUp ? d.nextFollowUp.toISOString().split('T')[0] : ''
+        d.lastContactedStr,
+        d.nextFollowUpStr,
+        d.conversationSummary
       ]);
 
       const csv = [headers, ...rows].map(row =>
-        row.map(cell => `"${cell || ''}"`).join(',')
+        row.map(cell => {
+          const str = (cell || '').toString();
+          // Escape quotes and wrap in quotes if contains comma
+          const escaped = str.replace(/"/g, '""');
+          return `"${escaped}"`;
+        }).join(',')
       ).join('\n');
 
-      const blob = new Blob([csv], { type: 'text/csv' });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `leads-export-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `med-buddy-leads-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    // Auto-refresh every 5 minutes
-    setInterval(loadData, 5 * 60 * 1000);
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
 
-    // Initial load
-    loadData();
+      // Auto-refresh every 5 minutes
+      setInterval(() => {
+        console.log('🔄 Auto-refreshing data...');
+        loadData();
+      }, AUTO_REFRESH_INTERVAL);
+    });
   </script>
 </body>
 </html>
