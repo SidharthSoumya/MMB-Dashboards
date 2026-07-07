@@ -867,12 +867,42 @@
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">📅 Date From</label>
-        <input type="date" class="filter-input" id="dateFrom" onchange="applyFilters()">
+        <label class="filter-label">📅 Month</label>
+        <select class="filter-select" id="monthFilter" onchange="applyFilters()">
+          <option value="">All Months</option>
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">📅 Date To</label>
-        <input type="date" class="filter-input" id="dateTo" onchange="applyFilters()">
+        <label class="filter-label">👥 Gender</label>
+        <select class="filter-select" id="genderFilter" onchange="applyFilters()">
+          <option value="">All Genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">🎂 Age Range</label>
+        <select class="filter-select" id="ageFilter" onchange="applyFilters()">
+          <option value="">All Ages</option>
+          <option value="0-18">0-18</option>
+          <option value="19-35">19-35</option>
+          <option value="36-50">36-50</option>
+          <option value="51-65">51-65</option>
+          <option value="65+">65+</option>
+        </select>
       </div>
     </div>
 
@@ -888,14 +918,6 @@
   <script>
     // Configuration
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQza5B6DrWd1smNddShoPKYT42_lRWCYqqvvoffdZNgx_Wp28KySj2HiMsefasoTdjCuUuqNTTgEZMH/pub?output=csv';
-
-    // Try multiple CORS proxies in order of preference
-    const CORS_PROXIES = [
-      'https://corsproxy.io/?' + encodeURIComponent(CSV_URL),
-      'https://proxy.cors.sh/' + CSV_URL,
-      'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL)
-    ];
-
     const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
     // State
@@ -948,6 +970,7 @@
           contact: (row['CONTACT'] || '').trim(),
           name: (row['NAME (If Known)'] || '').trim(),
           age: parseInt(row['AGE']) || null,
+          gender: (row['GENDER'] || '').trim(),
           leadSource: (row['LEAD SOURCE'] || 'Unknown').trim(),
           leadStage: (row['LEAD STAGE'] || 'Unknown').trim(),
           timeOfCall: (row['TIME OF CALL'] || '').trim(),
@@ -996,8 +1019,9 @@
       const source = document.getElementById('sourceFilter').value;
       const stage = document.getElementById('stageFilter').value;
       const interest = document.getElementById('interestFilter').value;
-      const dateFrom = document.getElementById('dateFrom').value;
-      const dateTo = document.getElementById('dateTo').value;
+      const month = document.getElementById('monthFilter').value;
+      const gender = document.getElementById('genderFilter').value;
+      const ageRange = document.getElementById('ageFilter').value;
 
       filteredData = allData.filter(d => {
         // Search filter
@@ -1018,9 +1042,18 @@
         // Interest filter
         if (interest && d.interest !== interest) return false;
 
-        // Date range filters
-        if (dateFrom && d.dateReceived && d.dateReceived < new Date(dateFrom)) return false;
-        if (dateTo && d.dateReceived && d.dateReceived > new Date(dateTo + 'T23:59:59')) return false;
+        // Month filter
+        if (month && d.dateReceived && d.dateReceived.getMonth() !== parseInt(month)) return false;
+
+        // Gender filter
+        if (gender && d.gender && d.gender !== gender) return false;
+
+        // Age range filter
+        if (ageRange && d.age !== null) {
+          const [min, max] = ageRange.split('-').map(v => parseInt(v.replace('+', '')));
+          const maxAge = ageRange.includes('+') ? Infinity : max;
+          if (d.age < min || d.age > maxAge) return false;
+        }
 
         return true;
       });
@@ -1329,7 +1362,7 @@
         </div>
 
         <!-- Recent Leads Table -->
-        <div class="table-card" style="margin-top: ${var(--spacing-xl)}">
+        <div class="table-card" style="margin-top: var(--spacing-xl)">
           <div class="table-header">
             <div class="table-title">📋 Recent Leads</div>
             <div class="table-actions">
@@ -1572,87 +1605,42 @@
       }
     }
 
-    async function loadData() {
-      if (isLoading) return;
+    function loadData() {
+      document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleString();
 
-      isLoading = true;
-      updateStatus('syncing', 'Syncing...');
+      // Use corsproxy.io to bypass CORS restrictions
+      const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(CSV_URL);
 
-      const refreshBtn = document.getElementById('refreshBtn');
-      if (refreshBtn) {
-        refreshBtn.disabled = true;
-        refreshBtn.style.opacity = '0.6';
-      }
-
-      let lastError = null;
-
-      // Try each proxy in sequence
-      for (const proxyUrl of CORS_PROXIES) {
-        try {
-          console.log('🔄 Trying proxy:', proxyUrl);
-
-          const response = await fetch(proxyUrl);
-          console.log('📡 Response status:', response.status);
-
+      fetch(PROXY_URL)
+        .then(response => {
           if (!response.ok) {
-            throw new Error('HTTP ' + response.status);
+            throw new Error('Network response was not ok: ' + response.status);
           }
-
-          const csvText = await response.text();
-          console.log('📄 CSV text length:', csvText.length);
-
-          // Parse CSV
-          const parseResult = await new Promise((resolve, reject) => {
-            Papa.parse(csvText, {
-              header: true,
-              skipEmptyLines: true,
-              complete: resolve,
-              error: reject
-            });
+          return response.text();
+        })
+        .then(csvText => {
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+              console.log('Parsed data:', results.data.length, 'rows');
+              try {
+                allData = processData(results.data);
+                console.log('Processed data:', allData.length, 'valid rows');
+                filteredData = [...allData];
+                populateFilters(allData);
+                renderDashboard(allData);
+              } catch (error) {
+                console.error('Processing error:', error);
+                showError('Error processing data: ' + error.message);
+              }
+            }
           });
-
-          console.log('✅ Parsed data:', parseResult.data.length, 'rows');
-          console.log('✅ First row:', parseResult.data[0]);
-
-          allData = processData(parseResult.data);
-          console.log('✅ Processed data:', allData.length, 'valid leads');
-          filteredData = [...allData];
-          populateFilters(allData);
-          renderDashboard(allData);
-          updateStatus('success', 'Connected');
-
-          const now = new Date();
-          document.getElementById('lastUpdated').textContent =
-            'Last updated: ' + now.toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-
-          isLoading = false;
-          if (refreshBtn) {
-            refreshBtn.disabled = false;
-            refreshBtn.style.opacity = '1';
-          }
-          return; // Success! Exit the function
-
-        } catch (error) {
-          console.error('❌ Proxy failed:', proxyUrl, error.message);
-          lastError = error;
-          // Continue to next proxy
-        }
-      }
-
-      // All proxies failed
-      console.error('❌ All proxies failed');
-      showError('Failed to load data: ' + (lastError?.message || 'Unknown error') +
-        '<br><br>Tried ' + CORS_PROXIES.length + ' proxies. Check your internet connection.');
-      isLoading = false;
-      if (refreshBtn) {
-        refreshBtn.disabled = false;
-        refreshBtn.style.opacity = '1';
-      }
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          showError('Failed to load data: ' + error.message);
+        });
     }
 
     function exportTable() {

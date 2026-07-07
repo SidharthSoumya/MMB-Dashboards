@@ -180,6 +180,67 @@
     .status-qualified { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
     .status-converted { background: rgba(157, 76, 255, 0.2); color: #9d4cff; }
 
+    /* Filter Bar */
+    .filter-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+    }
+
+    .filter-select,
+    .filter-input {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .filter-select:hover,
+    .filter-input:hover {
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+      border-color: #00d9ff;
+      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
+    }
+
+    .filter-select option {
+      background: #1a1a2e;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .filter-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Loading */
     .loading {
       display: flex;
@@ -238,6 +299,64 @@
       </div>
     </header>
 
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label">🔍 Search</label>
+        <input type="text" class="filter-input" id="searchFilter" placeholder="Patient name or UHID..." oninput="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">🏥 Hospital</label>
+        <select class="filter-select" id="hospitalFilter" onchange="applyFilters()">
+          <option value="">All Hospitals</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">🩺 Department</label>
+        <select class="filter-select" id="departmentFilter" onchange="applyFilters()">
+          <option value="">All Departments</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">📅 Month</label>
+        <select class="filter-select" id="monthFilter" onchange="applyFilters()">
+          <option value="">All Months</option>
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">👥 Gender</label>
+        <select class="filter-select" id="genderFilter" onchange="applyFilters()">
+          <option value="">All Genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">🎂 Age Range</label>
+        <select class="filter-select" id="ageFilter" onchange="applyFilters()">
+          <option value="">All Ages</option>
+          <option value="0-18">0-18</option>
+          <option value="19-35">19-35</option>
+          <option value="36-50">36-50</option>
+          <option value="51-65">51-65</option>
+          <option value="65+">65+</option>
+        </select>
+      </div>
+    </div>
+
     <div id="content">
       <div class="loading">
         <div class="spinner"></div>
@@ -253,6 +372,7 @@
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTOhcUNRC92HXBbyADCYoan3cCpDUa09hqPEqAIAz-qeI58eCC8Lc-L0HQCrJjz-rRh0NKdl5ep6XwM/pub?output=csv';
 
     let rawData = [];
+    let filteredData = [];
     let charts = {};
 
     function parseDate(dateStr) {
@@ -286,6 +406,7 @@
         dateStr: row['DATE'] || '',
         patientName: row["PATIENT'S NAME"] || '',
         age: parseInt(row['AGE']) || 0,
+        gender: (row['GENDER'] || '').trim(),
         contactNo: row['PATIENT CONTACT NO.'] || '',
         attendant: row['ATTENDANT (if any)'] || '',
         attendantContact: row['ATTENDANT CONTACT NO.'] || '',
@@ -300,6 +421,79 @@
         lastFollowUp: parseDate(row['LAST FOLLOW-UP']),
         notes: row['NOTES'] || ''
       })).filter(row => row.slNo !== '');
+    }
+
+    function getUniqueValues(data, field) {
+      return [...new Set(data.map(d => d[field]).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    }
+
+    function populateFilters(data) {
+      const hospitalSelect = document.getElementById('hospitalFilter');
+      const departmentSelect = document.getElementById('departmentFilter');
+
+      // Clear existing options (except "All")
+      hospitalSelect.innerHTML = '<option value="">All Hospitals</option>';
+      departmentSelect.innerHTML = '<option value="">All Departments</option>';
+
+      const hospitals = getUniqueValues(data, 'hospital');
+      const departments = getUniqueValues(data, 'department');
+
+      hospitals.forEach(hospital => {
+        const option = document.createElement('option');
+        option.value = hospital;
+        option.textContent = hospital;
+        hospitalSelect.appendChild(option);
+      });
+
+      departments.forEach(department => {
+        const option = document.createElement('option');
+        option.value = department;
+        option.textContent = department;
+        departmentSelect.appendChild(option);
+      });
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchFilter').value.toLowerCase();
+      const hospital = document.getElementById('hospitalFilter').value;
+      const department = document.getElementById('departmentFilter').value;
+      const month = document.getElementById('monthFilter').value;
+      const gender = document.getElementById('genderFilter').value;
+      const ageRange = document.getElementById('ageFilter').value;
+
+      filteredData = rawData.filter(d => {
+        // Search filter
+        if (search) {
+          const searchMatch =
+            (d.patientName && d.patientName.toLowerCase().includes(search)) ||
+            (d.slNo && d.slNo.toLowerCase().includes(search));
+          if (!searchMatch) return false;
+        }
+
+        // Hospital filter
+        if (hospital && d.hospital !== hospital) return false;
+
+        // Department filter
+        if (department && d.department !== department) return false;
+
+        // Month filter
+        if (month && d.date && d.date.getMonth() !== parseInt(month)) return false;
+
+        // Gender filter
+        if (gender && d.gender && d.gender !== gender) return false;
+
+        // Age range filter
+        if (ageRange && d.age > 0) {
+          const [min, max] = ageRange.split('-').map(v => parseInt(v.replace('+', '')));
+          const maxAge = ageRange.includes('+') ? Infinity : max;
+          if (d.age < min || d.age > maxAge) return false;
+        }
+
+        return true;
+      });
+
+      const metrics = calculateMetrics(filteredData);
+      renderDashboard(filteredData, metrics);
     }
 
     function calculateMetrics(data) {
@@ -688,8 +882,10 @@
               try {
                 rawData = processData(results.data);
                 console.log('Processed data:', rawData.length, 'valid rows');
-                const metrics = calculateMetrics(rawData);
-                renderDashboard(rawData, metrics);
+                filteredData = [...rawData];
+                populateFilters(rawData);
+                const metrics = calculateMetrics(filteredData);
+                renderDashboard(filteredData, metrics);
               } catch (error) {
                 console.error('Processing error:', error);
                 showError('Error processing data: ' + error.message);
