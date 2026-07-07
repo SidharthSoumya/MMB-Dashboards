@@ -11,19 +11,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
+      /* MMB Brand Colors - Extracted from Logo */
+      --mmb-blue: #0033CC;
+      --mmb-blue-dark: #002299;
+      --mmb-blue-light: #0044EE;
+      --mmb-blue-rgb: 0, 51, 204;
+      --mmb-white: #ffffff;
+
       /* Design System - Modern Dark Theme with Glassmorphism */
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #12121a;
+      --bg-primary: #0a0a1a;
+      --bg-secondary: #12122a;
       --bg-card: rgba(255, 255, 255, 0.03);
       --bg-card-hover: rgba(255, 255, 255, 0.06);
       --bg-elevated: rgba(255, 255, 255, 0.08);
 
-      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-      --gradient-gold: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+      --gradient-primary: linear-gradient(135deg, var(--mmb-blue) 0%, var(--mmb-blue-light) 100%);
+      --gradient-success: linear-gradient(135deg, #00aa66 0%, #00cc88 100%);
+      --gradient-warning: linear-gradient(135deg, #ff9800 0%, #ffc107 100%);
+      --gradient-info: linear-gradient(135deg, var(--mmb-blue-light) 0%, #00d9ff 100%);
+      --gradient-danger: linear-gradient(135deg, #e53935 0%, #ff5252 100%);
+      --gradient-gold: linear-gradient(135deg, #ff9800 0%, #ffc107 100%);
 
       --text-primary: #ffffff;
       --text-secondary: #a0a0b0;
@@ -31,8 +38,10 @@
 
       --border-glass: rgba(255, 255, 255, 0.08);
       --border-glass-hover: rgba(255, 255, 255, 0.15);
+      --border-accent: rgba(0, 51, 204, 0.3);
       --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
-      --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.15);
+      --shadow-brand: 0 8px 32px rgba(0, 51, 204, 0.3);
+      --shadow-glow: 0 0 40px rgba(0, 51, 204, 0.2);
       --backdrop-blur: blur(20px);
 
       --radius-sm: 8px;
@@ -72,8 +81,8 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-primary);
       background-image:
-        radial-gradient(ellipse at top, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at bottom right, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+        radial-gradient(ellipse at top, rgba(0, 51, 204, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(0, 68, 238, 0.1) 0%, transparent 50%);
       min-height: 100vh;
       color: var(--text-primary);
       line-height: 1.5;
@@ -97,6 +106,19 @@
       border-bottom: 1px solid var(--border-glass);
     }
 
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      height: 50px;
+      width: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 51, 204, 0.4);
+    }
+
     .header-title {
       display: flex;
       align-items: center;
@@ -105,8 +127,8 @@
 
     h1 {
       font-size: 28px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4facfe 100%);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--mmb-blue-light) 0%, #00d9ff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -269,8 +291,8 @@
 
     .filter-select:focus,
     .filter-input:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+      border-color: var(--mmb-blue);
+      box-shadow: 0 0 0 3px rgba(0, 51, 204, 0.2);
     }
 
     .filter-select option {
@@ -601,33 +623,33 @@
     }
 
     .badge-high {
-      background: rgba(235, 51, 73, 0.15);
-      color: #eb3349;
-      border: 1px solid rgba(235, 51, 73, 0.3);
+      background: rgba(229, 57, 53, 0.15);
+      color: #ff5252;
+      border: 1px solid rgba(229, 57, 53, 0.3);
     }
 
     .badge-medium {
-      background: rgba(245, 87, 108, 0.15);
-      color: #f5576c;
-      border: 1px solid rgba(245, 87, 108, 0.3);
+      background: rgba(255, 152, 0, 0.15);
+      color: #ff9800;
+      border: 1px solid rgba(255, 152, 0, 0.3);
     }
 
     .badge-low {
-      background: rgba(102, 126, 234, 0.15);
-      color: #667eea;
-      border: 1px solid rgba(102, 126, 234, 0.3);
+      background: rgba(0, 51, 204, 0.15);
+      color: #4d88ff;
+      border: 1px solid rgba(0, 51, 204, 0.3);
     }
 
     .badge-called {
-      background: rgba(56, 239, 125, 0.15);
-      color: #38ef7d;
-      border: 1px solid rgba(56, 239, 125, 0.3);
+      background: rgba(0, 200, 100, 0.15);
+      color: #00cc66;
+      border: 1px solid rgba(0, 200, 100, 0.3);
     }
 
     .badge-attempted {
-      background: rgba(240, 147, 251, 0.15);
-      color: #f093fb;
-      border: 1px solid rgba(240, 147, 251, 0.3);
+      background: rgba(124, 77, 255, 0.15);
+      color: #9d4cff;
+      border: 1px solid rgba(124, 77, 255, 0.3);
     }
 
     .badge-not-set {
@@ -649,7 +671,7 @@
     }
 
     .contact-link:hover {
-      color: #667eea;
+      color: var(--mmb-blue-light);
     }
 
     /* Loading State */
@@ -823,8 +845,11 @@
 <body>
   <div class="container">
     <header>
-      <div class="header-title">
-        <h1>🎯 Med Buddy Leads Dashboard</h1>
+      <div class="header-brand">
+        <img src="../assets/mmb-logo-dark.png" alt="MMB Logo" class="brand-logo">
+        <div class="header-title">
+          <h1>Med Buddy Leads Dashboard</h1>
+        </div>
       </div>
       <div class="header-actions">
         <span class="status-indicator" id="statusIndicator">
@@ -1413,11 +1438,11 @@
         datasets: [{
           label: 'Leads',
           data: sortedDates.map(d => metrics.dailyTrend[d]),
-          borderColor: '#667eea',
-          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          borderColor: 'var(--mmb-blue-light)',
+          backgroundColor: 'rgba(0, 51, 204, 0.15)',
           fill: true,
           tension: 0.4,
-          pointBackgroundColor: '#667eea',
+          pointBackgroundColor: 'var(--mmb-blue)',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointRadius: 4,
@@ -1452,10 +1477,10 @@
         datasets: [{
           data: [metrics.byInterest.HIGH, metrics.byInterest.MEDIUM, metrics.byInterest.LOW, metrics.byInterest['NOT SET']],
           backgroundColor: [
-            'rgba(235, 51, 73, 0.9)',
-            'rgba(245, 87, 108, 0.9)',
-            'rgba(102, 126, 234, 0.9)',
-            'rgba(107, 107, 123, 0.5)'
+            'rgba(229, 57, 53, 0.9)',
+            'rgba(255, 152, 0, 0.9)',
+            'rgba(0, 51, 204, 0.9)',
+            'rgba(120, 120, 140, 0.5)'
           ],
           borderColor: 'rgba(255, 255, 255, 0.1)',
           borderWidth: 2,
@@ -1486,9 +1511,9 @@
         datasets: [{
           label: 'Leads',
           data: topSources.map(s => s[1]),
-          backgroundColor: 'rgba(118, 75, 162, 0.8)',
+          backgroundColor: 'rgba(0, 51, 204, 0.8)',
           borderRadius: 8,
-          border: { color: 'rgba(118, 75, 162, 1)', width: 2 },
+          border: { color: 'var(--mmb-blue)', width: 2 },
           barThickness: 32
         }]
       }, {
@@ -1514,9 +1539,9 @@
           label: 'Leads',
           data: Object.values(metrics.byStage),
           backgroundColor: [
-            'rgba(56, 239, 125, 0.8)',
-            'rgba(240, 147, 251, 0.8)',
-            'rgba(102, 126, 234, 0.8)'
+            'rgba(0, 200, 100, 0.8)',
+            'rgba(124, 77, 255, 0.8)',
+            'rgba(0, 51, 204, 0.8)'
           ],
           borderRadius: 8,
           border: { width: 2 },
@@ -1539,8 +1564,8 @@
       // Render funnel
       const totalLeads = metrics.total;
       const funnelData = [
-        { label: 'Attempted Call', count: metrics.byStage['Attempted Call'] || 0, gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-        { label: 'Called', count: metrics.byStage['Called'] || 0, gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' },
+        { label: 'Attempted Call', count: metrics.byStage['Attempted Call'] || 0, gradient: 'linear-gradient(135deg, #9d4cff 0%, #7c4dff 100%)' },
+        { label: 'Called', count: metrics.byStage['Called'] || 0, gradient: 'linear-gradient(135deg, var(--mmb-blue) 0%, var(--mmb-blue-light) 100%)' },
       ];
 
       const funnelContainer = document.getElementById('funnelContainer');
